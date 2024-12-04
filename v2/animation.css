@@ -1,0 +1,406 @@
+@keyframes won {
+  from {
+    top: 100%;
+    transform: rotate(180deg);
+  }
+
+  to {
+    top: 30%;
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes start {
+  from {
+    top: 30%;
+    transform: rotate(0deg);
+  }
+
+  to {
+    top: 100%;
+    transform: rotate(180deg);
+  }
+}
+
+@keyframes floating {
+  0% {
+    top: 0;
+    transform: rotate(0deg);
+  }
+
+  25% {
+    top: 5px;
+    transform: rotate(3deg);
+  }
+
+  50% {
+    top: -5px;
+    transform: rotate(-3deg);
+  }
+
+  100% {
+    top: 0;
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes getIn {
+  from {
+    background-size: 0;
+  }
+
+  to {
+    background-size: 70%;
+  }
+}
+
+@keyframes getIn1 {
+  from {
+    background-size: 0;
+  }
+
+  to {
+    background-size: 70%;
+  }
+}
+
+@keyframes levelUp {
+  0% {
+    opacity: 0;
+    visibility: visible;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* 媒体查询：移动端竖屏适配 */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+    /* 较小的屏幕留一些边距 */
+  }
+
+  h1 {
+    font-size: 40px;
+    /* 标题字体稍微小一点 */
+  }
+
+  h2 {
+    font-size: 28px;
+    /* 子标题字体稍微小一点 */
+  }
+
+  p {
+    font-size: 18px;
+    /* 正文字体稍微小一点 */
+  }
+
+  .won,
+  .init,
+  .defeat {
+    width: 360px;
+    height: 210px;
+  }
+
+  .game-container {
+    padding: 10px;
+    gap: 10px;
+    /* 缩小间距 */
+  }
+
+  .board {
+    width: 88vw;
+    /* 使用视口宽度的100% */
+    height: calc(88vw);
+    /* 高度与宽度一致，保证正方形 */
+  }
+
+  .piece {
+    width: 46px;
+    height: 46px;
+    /* 调整棋子的尺寸 */
+  }
+
+  .controls {
+    width: 100%;
+    padding: 5px;
+    flex-direction: row;
+    /* 按钮垂直排列 */
+    gap: 0;
+  }
+
+  .game-info {
+    display: flex;
+    flex-direction: row;
+    /* 保持水平排列 */
+
+    gap: 10px;
+    /* 调整元素间的间距 */
+    flex-wrap: wrap;
+    /* 允许元素换行，防止溢出 */
+  }
+
+  /* 调整 game-info 中每个 div 的大小和对齐 */
+  .game-info > div {
+    font-family: "Roboto", sans-serif;
+    font-size: 12px;
+    color: #333;
+  }
+
+  .btn {
+    font-size: 14px;
+    /* 调整按钮文字 */
+    padding: 6px 12px;
+    /* 调整按钮大小 */
+  }
+
+  #surrender,
+  #settings {
+    width: 30px;
+    height: 30px;
+    /* 按钮尺寸变小 */
+  }
+
+  .settings-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease,
+    visibility 0.3s ease;
+  }
+
+  .settings-panel.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* 设置面板内容区域样式 */
+  .settings-content {
+    /* background: rgba(255, 255, 255, 1.9); */
+    padding: 2px;
+    border-radius: 9px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    max-width: 360px;
+    max-height: 280px;
+    width: 100%;
+    text-align: center;
+    border: 4px solid #333;
+  }
+
+  .settings-group {
+    margin-bottom: 15px;
+    align-items: center;
+  }
+
+  .settings-group h3 {
+    font-size: 15px;
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  /* 主题和棋子样式按钮 */
+  .theme-options,
+  .piece-style-options {
+    display: flex;
+    justify-content: center;
+    /* 水平居中对齐 */
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    /* 允许按钮换行 */
+    width: 80%;
+  }
+
+  .theme-btn,
+  .piece-style-btn {
+    padding: 8px 15px;
+    border: 2px solid #333;
+    border-radius: 5px;
+    background: #f8f994;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    justify-content: center;
+  }
+
+  .theme-btn:hover,
+  .piece-style-btn:hover {
+    border-color: #9ff1a5;
+  }
+
+  /* 开关样式 */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 55px;
+    height: 32px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #333;
+    transition: 0.4s;
+    border-radius: 34px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+
+  #closeSettings {
+    font-family: "myFont", serif;
+    display: block;
+    margin: 20px auto 0;
+    padding: 8px 25px;
+    background: #ff9292;
+    color: #333;
+
+    border-radius: 5px;
+    border: 2px solid #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  /* 边框和间距调整 */
+  .cell.selected,
+  .cell.valid-move {
+    outline-width: 2px;
+  }
+}
+
+@media (max-width: 400px) {
+  body {
+    padding: 8px;
+    /* 较小的屏幕留一些边距 */
+  }
+
+  h1 {
+    font-size: 30px;
+    /* 标题字体更小一些 */
+  }
+
+  h2 {
+    font-size: 22px;
+    /* 子标题字体更小一些 */
+  }
+
+  p {
+    font-size: 16px;
+    /* 正文字体更小一些 */
+  }
+
+  .won,
+  .init,
+  .defeat {
+    width: 300px;
+    height: 180px;
+    /* 调整动画元素尺寸 */
+  }
+
+  .game-container {
+    padding: 8px;
+    gap: 8px;
+    /* 更小的间距 */
+  }
+
+  .board {
+    width: 88vw;
+    /* 使用视口宽度的90% */
+    height: calc(88vw);
+    /* 高度与宽度一致，保证正方形 */
+  }
+
+  .piece {
+    width: 40px;
+    height: 40px;
+    /* 调整棋子的尺寸 */
+  }
+
+  .controls {
+    width: 100%;
+    padding: 5px;
+    flex-direction: row;
+    /* 按钮垂直排列 */
+    gap: 0;
+  }
+
+  .game-info {
+    display: flex;
+    flex-direction: row;
+    /* 保持水平排列 */
+
+    gap: 6px;
+    /* 调整元素间的间距 */
+    flex-wrap: wrap;
+    /* 允许元素换行，防止溢出 */
+  }
+
+  /* 调整 game-info 中每个 div 的大小和对齐 */
+  .game-info > div {
+    font-family: "Roboto", sans-serif;
+    font-size: 10px;
+    color: #333;
+  }
+
+  .btn {
+    font-size: 14px;
+    /* 调整按钮文字 */
+    padding: 6px 12px;
+    /* 调整按钮大小 */
+  }
+
+  #surrender,
+  #settings {
+    width: 30px;
+    height: 30px;
+    /* 按钮尺寸变小 */
+  }
+
+  .settings-content {
+    /* background: rgba(255, 255, 255, 1.9); */
+    padding: 2px;
+    border-radius: 9px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    max-width: 330px;
+    max-height: 280px;
+    width: 100%;
+    text-align: center;
+    border: 4px solid #333;
+  }
+}

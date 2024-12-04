@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>ChessMin</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="ChessMin.css" rel="stylesheet"/>
+    <link href="./animation.css" rel="stylesheet"/>
+</head>
+
+<body>
+<div class="init">
+    <div class="center1">
+        <h1>来挑战吧！</h1>
+        <p>点击选择棋子，形成“己己敌”的阵型吃掉对方棋子</p>
+        <p class="floating bold">START GAME</p>
+    </div>
+</div>
+<div class="won">
+    <div class="center">
+        <h1 class="title1"></h1>
+        <p class="end-time">本轮耗时:</p>
+        <p class="floating replay bold">敢再挑战一次吗</p>
+    </div>
+</div>
+<!-- <div class="init hidden">
+    <h1 class="center">不可思议，你赢了</h1>
+</div> -->
+
+<div class="game-container">
+    <div class="controls">
+        <div class="game-info">
+            <div class="total-time"><span id="total-time">时长</span></div>
+            <div class="timer">局时: <span id="Timer">40</span></div>
+            <div class="current-player">
+                回合: <span id="playerIndicator"></span>
+            </div>
+            <div class="player-stats">
+                <span class="red-dot">&#x25CF; 7</span>
+                <span class="black-dot">&#x25CF; 7</span>
+            </div>
+        </div>
+        <div class="control-buttons">
+            <button id="surrender" class="btn btn-danger"></button>
+            <button id="settings" class="btn btn-primary"></button>
+        </div>
+    </div>
+    <div class="board"></div>
+    <div class="settings-panel hidden">
+        <div class="settings-content">
+            <div class="settings-group">
+                <h3>主题选择</h3>
+                <div class="theme-options">
+                    <button class="theme-btn" data-theme="classic">经典</button>
+                    <button class="theme-btn" data-theme="modern">现代</button>
+                    <button class="theme-btn" data-theme="dark">暗色</button>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3>游戏音效</h3>
+                <div class="sound-options">
+                    <label class="switch">
+                        <input id="soundToggle" type="checkbox"/>
+                        <span class="slider"></span>
+                    </label>
+                    <span>开启音效</span>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3>选择你喜欢的棋子颜色</h3>
+                <div class="piece-style-options">
+                    <button
+                            class="piece-style-btn"
+                            data-style="black"
+                            style="background-color: black; color: white"
+                    ></button>
+                    <button
+                            class="piece-style-btn"
+                            data-style="green"
+                            style="background-color: green; color: white"
+                    ></button>
+                    <button
+                            class="piece-style-btn"
+                            data-style="lightblue"
+                            style="background-color: lightblue; color: white"
+                    ></button>
+                    <input
+                            class="piece-style-btn"
+                            data-style="custom"
+                            style="background-color: #800080"
+                            type="color"
+                            value="#800080"
+                    />
+                </div>
+            </div>
+
+            <button id="closeSettings" class="btn">确认</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import ChessMinControl from "./ChessMin.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        new ChessMinControl();
+    });
+</script>
+</body>
+</html>
