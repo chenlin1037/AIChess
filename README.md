@@ -6,11 +6,11 @@
 
 ## 游戏截图
 
-![alt text](进入游戏.png)
+![alt text](./v2/进入游戏.png)
 *进入游戏后的初始界面*
-![alt text](游戏设置.png)
+![alt text](./v2/游戏设置.png)
 *游戏设置*
-![alt text](玩家投降.png)
+![alt text](./v2/玩家投降.png)
 *玩家投降*
 
 ## 棋盘和初始布局
