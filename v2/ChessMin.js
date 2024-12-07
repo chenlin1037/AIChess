@@ -11,56 +11,91 @@ export default class ChessMinControl {
     "./resources/sound/click.mp3",
     "./resources/sound/capture.mp3",
   ];
-  //初始化
-  lose = new Audio(this.soundFiles[0]);
-  move = new Audio(this.soundFiles[1]);
-  win = new Audio(this.soundFiles[2]);
-  click = new Audio(this.soundFiles[3]);
-  capture = new Audio(this.soundFiles[4]);
-
-  // audioElements = this.soundFiles.map(file => new Audio(file));
 
   constructor() {
     this.initializeGame();
-    this.isSoundEnabled = true;
+    this.initializeAudio();
+    this.initializeElements();
     localStorage.setItem("chessmin-sound-enabled", "true");
 
+    document.querySelector(".floating").addEventListener("click", () => {
+      let init = document.querySelector(".init");
+      init.style.animation = "start .5s ease-in";
+      init.style.top = "100%";
+      this.startGame();
+    });
+
+    this.ui.render();
+  }
+
+  initializeAudio() {
+    [this.lose, this.move, this.win, this.click, this.capture] =
+      this.soundFiles.map((file) => new Audio(file));
+  }
+
+  initializeElements() {
     this.boardElement = document.querySelector(".board");
     this.replayElement = document.querySelector(".replay");
     this.surrenderButton = document.getElementById("surrender");
     this.settingsButton = document.getElementById("settings");
     this.settingsPanel = document.querySelector(".settings-panel");
     this.closeSettingsButton = document.getElementById("closeSettings");
-
-    this.start = document.querySelector(".floating");
-    this.start.addEventListener("click", () => {
-      let init = document.querySelector(".init");
-      init.style.animation = "start .5s ease-in";
-      init.style.top = "100%";
-      this.startNewGame();
-    });
-
-    this.ui.render();
+    this.title1 = document.querySelector(".title1");
+    this.timerTurn = document.querySelector(".timer");
+    this.endTime = document.querySelector(".end-time");
+    this.totalTimeElement = document.getElementById("total-time");
   }
 
   initEventListeners() {
-    if (this.boardElement) {
-      this.boardElement.addEventListener(
-        "click",
-        this.handleCellClick.bind(this),
-      );
-    }
-    if (this.startElement) {
-      this.startElement.addEventListener("click", () => this.start());
-    }
-    if (this.replayElement) {
-      this.replayElement.addEventListener("click", () => this.replay());
-    }
-    if (this.surrenderButton) {
-      this.surrenderButton.addEventListener("click", this.surrender.bind(this));
-    }
-    //设置面板监听
+    const listeners = [
+      {
+        element: this.boardElement,
+        event: "click",
+        handler: this.handleCellClick,
+      },
+      { element: this.replayElement, event: "click", handler: this.replay },
+      {
+        element: this.surrenderButton,
+        event: "click",
+        handler: this.surrender,
+      },
+    ];
+
+    listeners.forEach(({ element, event, handler }) => {
+      if (element) {
+        element.addEventListener(event, handler.bind(this));
+      }
+    });
+
     this.initSettingsPanel();
+  }
+
+  initializeGame() {
+    this.game = new ChessGame(); //主逻辑
+    this.ui = new GameUI(this.game); //渲染
+    this.ai = new ChessAI02(this.game, 2000); //AI
+    this.isSoundEnabled = true;
+    this.selectedPiece = null;
+    this.lastMove = null;
+    this.isGameOver = false;
+    this.timer = null;
+  }
+
+  startGame() {
+    this.initializeGame();
+    this.ui.render();
+    this.surrenderButton.disabled = false;
+
+    this.clearTimer();
+    this.timeLeft = 40; // 重置时间
+    this.updateTimerDisplay(); // 最开始是40秒
+    this.totalTime = new Timer(this.totalTimeElement);
+    this.totalTime.start();
+
+    this.initEventListeners();
+    this.game.currentPlayer === this.game.PLAYER_A
+      ? this.makeAIMove()
+      : this.startTimer();
   }
 
   initSettingsPanel() {
@@ -99,31 +134,6 @@ export default class ChessMinControl {
       }
     });
 
-    // 主题切换功能
-    const themeButtons = document.querySelectorAll(".theme-btn");
-    themeButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const theme = btn.dataset.theme;
-        this.changeTheme(theme);
-      });
-    });
-
-    // 棋子样式切换功能
-    const pieceStyleButtons = document.querySelectorAll(".piece-style-btn");
-    pieceStyleButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const style = btn.dataset.style;
-        this.changePieceStyle(style);
-      });
-    });
-    const colorInput = document.querySelector(
-      'input[type="color"].piece-style-btn',
-    );
-    colorInput.addEventListener("input", (event) => {
-      event.target.style.backgroundColor = event.target.value;
-      this.changePieceStyle(event.target.value);
-    });
-
     const soundToggle = document.getElementById("soundToggle");
     if (soundToggle) {
       // 初始化时根据本地存储设置开关状态
@@ -140,33 +150,6 @@ export default class ChessMinControl {
     }
   }
 
-  changeTheme(theme) {
-    document.body.className = theme;
-    localStorage.setItem("chessmin-theme", theme);
-  }
-
-  changePieceStyle(style) {
-    let color;
-
-    switch (style) {
-      case "black":
-        color = "black";
-        break;
-      case "green":
-        color = "green";
-        break;
-      case "lightblue":
-        color = "lightblue";
-        break;
-      default:
-        color = style; // Assume custom color
-        break;
-    }
-
-    document.documentElement.style.setProperty("--piece-bg-color", color);
-    localStorage.setItem("chessmin-piece-style", style);
-  }
-
   toggleSound(enabled) {
     // 保存音频状态到本地存储
     localStorage.setItem("chessmin-sound-enabled", enabled);
@@ -174,54 +157,6 @@ export default class ChessMinControl {
     // 更新音频状态标记
     this.isSoundEnabled = enabled;
   }
-
-  initializeGame() {
-    this.game = new ChessGame();
-    this.ui = new GameUI(this.game);
-    this.ai = new ChessAI02(this.game, 2000);
-    this.selectedPiece = null;
-    this.lastMove = null;
-    this.isGameOver = false;
-    this.timer = null;
-    this.timeLeft = 40;
-    this.gameStartTime = null;
-    this.totalGameTime = 0;
-  }
-
-  startNewGame() {
-    this.initializeGame();
-    this.ui.render();
-    this.isSoundEnabled = false;
-    this.surrenderButton.disabled = false;
-
-    this.clearTimer();
-    this.timeLeft = 40; // 重置时间
-    this.updateTimerDisplay(); // 更新显示为初始时间
-
-    this.gameStartTime = Date.now(); // 重新开始时重置计时
-    this.totalGameTime = 0;
-    this.totalElement = document.getElementById("total-time");
-    this.title1 = document.querySelector(".title1");
-    this.endTime = document.querySelector(".end-time");
-    this.totalTime = new Timer(this.totalElement);
-    this.timerElement = document.querySelector(".timer");
-    this.totalTime.start();
-
-    this.initEventListeners();
-
-    if (this.game.currentPlayer === this.game.PLAYER_A) {
-      this.makeAIMove();
-    } else if (this.game.currentPlayer === this.game.PLAYER_B) {
-      this.startTimer();
-    }
-  }
-
-  formatTime(totalSeconds) {
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}分${seconds}秒`;
-  }
-
   startTimer() {
     this.clearTimer(); // 清除之前的计时器
 
@@ -239,9 +174,10 @@ export default class ChessMinControl {
     }, 1000);
   }
 
+  //更新回合时长显示（40秒）
   updateTimerDisplay() {
-    if (this.timerElement) {
-      this.timerElement.textContent = ` ${this.timeLeft}`;
+    if (this.timerTurn) {
+      this.timerTurn.textContent = ` ${this.timeLeft}`;
     }
   }
 
@@ -252,75 +188,40 @@ export default class ChessMinControl {
     }
   }
 
-  replay() {
-    // 重置计时器和游戏时间
-    this.totalGame = document.querySelector(".total-time");
-    this.totalTime = new Timer(this.totalGame);
-
-    // 确保计时器被正确启动
-    this.clearTimer();
-    this.timeLeft = 40; // 重置时间
-    this.updateTimerDisplay();
-
-    // 确保所有UI元素被正确重置
-    this.ui.render();
-
-    // 确保事件监听器不会重复绑定
-    if (!this.eventListenersInitialized) {
-      this.initEventListeners();
-      this.eventListenersInitialized = true;
-    }
-
-    // 重置游戏状态
-    this.selectedPiece = null;
-    this.lastMove = null;
-    this.isGameOver = false;
-    this.startNewGame();
-
-    // document.querySelector('.hidden').classList.add('levelUp');
-    let bang = document.querySelector(".won");
-
-    bang.style.animation = "start .6s ease-in-out";
-    bang.style.top = "100%";
-  }
-
-  // start() {
-  //     this.startNewGame();
-  // }
-
-  surrender() {
-    this.isGameOver = true;
-
-    this.surrenderButton.disabled = true;
+  resetTime() {
     this.clearTimer();
     this.timeLeft = 40;
     this.updateTimerDisplay();
     this.totalTime.stop();
-    if (this.gameStartTime) {
-      this.totalGameTime = Math.floor((Date.now() - this.gameStartTime) / 1000);
+  }
+
+  replay() {
+    if (!this.eventListenersInitialized) {
+      this.initEventListeners();
+      this.eventListenersInitialized = true;
     }
-    // this.totalGameTimeElement.textContent = this.formatTime(this.totalGameTime);
+    this.startGame();
+
+    let bang = document.querySelector(".won");
+    bang.style.animation = "start .6s ease-in-out";
+    bang.style.top = "100%";
+  }
+
+  surrender() {
+    this.isGameOver = true;
+    this.surrenderButton.disabled = true;
+
+    this.resetTime(); // 重置时间
     let bang = document.querySelector(".won");
     this.title1.textContent = "你输了！";
-    this.endTime.textContent = this.formatTime(this.totalGameTime);
+    this.endTime.textContent = this.totalTime.getFinalTime();
     bang.style.animation = "won .6s ease-in-out";
     bang.style.top = "30%";
+
     if (this.isSoundEnabled) {
       this.lose.play().catch((error) => {
         console.error("失败音效播放失败:", error);
       });
-
-      // setTimeout(() => {
-      //     confetti({
-      //         particleCount: 200,
-      //         spread: 70,
-      //         origin: { y: 0.6 },
-      //         colors: ['#ff5acd', '#fbda61', '#4158d0']
-      //     });
-      // }, 1000);
-
-      // let message = `游戏结束：玩家(黑方)投降！ (总时长: ${this.formatTime(this.totalGameTime)})`;
-      // setTimeout(() => alert(message), 100);
     }
   }
 
@@ -336,7 +237,6 @@ export default class ChessMinControl {
           const bestMove = this.ai.findBestMove();
           if (bestMove) {
             const result = this.game.makeMove(bestMove, this.game.PLAYER_A);
-            // resolve(result);
             resolve({ move: bestMove, ...result });
           } else {
             resolve(null);
@@ -364,13 +264,6 @@ export default class ChessMinControl {
         }
 
         this.ui.showLastMove(result.move);
-
-        // this.recordMove(
-        //     this.game.PLAYER_A,
-        //     result.move,
-        //     result.capturedPosition,
-        // );
-
         const gameStatus = this.game.checkGameOver();
         if (gameStatus !== null) {
           this.endGame(gameStatus);
@@ -389,71 +282,44 @@ export default class ChessMinControl {
 
   endGame(status) {
     this.isGameOver = true;
-    this.clearTimer();
-    this.timeLeft = 40; // 重置时间
-    this.updateTimerDisplay(); // 更新显示为初始时间
-    this.totalTime.stop();
+    this.surrenderButton.disabled = true;
 
-    if (this.gameStartTime) {
-      this.totalGameTime = Math.floor((Date.now() - this.gameStartTime) / 1000); // 转换为秒
-    }
+    this.resetTime();
+    let bang = document.querySelector(".won");
 
-    // const gameResult = {
-    //   status:
-    //     status === 0
-    //       ? "平局"
-    //       : status === this.game.PLAYER_A
-    //         ? "AI获胜"
-    //         : "玩家获胜",
-    //   totalTime: this.formatTime(this.totalGameTime),
-    //   totalMoves: this.totalMoves,
-    //   gameLog: this.gameLog,
-    //   timestamp: new Date().toISOString(),
-    // };
-
-    // let message;
     if (status === 0) {
-      // message = `游戏结束：平局 (总时长: ${this.formatTime(this.totalGameTime)})`;
-      let bang = document.querySelector(".won");
       this.title1.textContent = "平局！";
-      bang.style.animation = "won .6s ease-in-out";
-      bang.style.top = "30%";
     } else {
-      // message = `游戏结束：${status === this.game.PLAYER_A ? "AI(红方)" : "玩家(黑方)"}获胜！ (总时长: ${this.formatTime(this.totalGameTime)})`;
-      let bang = document.querySelector(".won");
       this.title1.textContent =
         status === this.game.PLAYER_A ? "AI获胜！" : "玩家获胜！";
-      this.endTime.textContent = this.formatTime(this.totalGameTime);
-      bang.style.animation = "won .6s ease-in-out";
-      bang.style.top = "30%";
-    }
-    //如果是游戏结束状态，那么不可以发起投降
-    if (status) {
-      this.surrenderButton.disabled = true;
     }
 
+    this.endTime.textContent = this.totalTime.getFinalTime();
+    bang.style.animation = "won .6s ease-in-out";
+    bang.style.top = "30%";
+
     // 播放音效
-    if (status !== 0 && this.isSoundEnabled) {
+    if (this.isSoundEnabled && status !== 0) {
       if (status === this.game.PLAYER_B) {
-        this.win.play().catch((error) => {
-          console.error("胜利音效播放失败:", error);
-        });
+        this.win.play().catch(
+          (error) => {
+            console.error("胜利音效播放失败:", error);
+          },
+          //胜利动画
+          setTimeout(() => {
+            confetti({
+              particleCount: 200,
+              spread: 70,
+              origin: { y: 0.6 },
+              colors: ["#ff5acd", "#fbda61", "#4158d0"],
+            });
+          }, 1000),
+        );
       } else {
         this.lose.play().catch((error) => {
           console.error("失败音效播放失败:", error);
         });
       }
-    }
-    // 如果赢了，放烟花效果
-    if (status !== 0 && status === this.game.PLAYER_B) {
-      setTimeout(() => {
-        confetti({
-          particleCount: 200,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ["#ff5acd", "#fbda61", "#4158d0"],
-        });
-      }, 1000);
     }
   }
 
@@ -535,7 +401,6 @@ export default class ChessMinControl {
             console.error("移动音效播放失败:", error);
           });
         }
-        // console.log("当前玩家变更为:", this.game.currentPlayer);
 
         if (result.capturedPosition) {
           this.ui.applyCaptureAnimation(result.capturedPosition);
@@ -545,9 +410,6 @@ export default class ChessMinControl {
             });
           }
         }
-
-        // this.recordMove(this.game.PLAYER_B, move, result.capturedPosition);
-
         const gameStatus = this.game.checkGameOver();
         if (gameStatus !== null) {
           this.endGame(gameStatus);

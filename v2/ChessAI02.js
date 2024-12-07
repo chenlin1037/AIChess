@@ -18,7 +18,6 @@ export default class ChessAI02 {
       [3, 4, 5, 4, 3],
     ];
   }
-
   // 检查是否超时
   isTimeUp() {
     return Date.now() - this.startTime >= this.timeLimit;
@@ -312,8 +311,8 @@ export default class ChessAI02 {
         }
       }
 
-      const thinkingTime = Date.now() - this.startTime;
-      console.log(`AI思考时间: ${thinkingTime}ms, 达到最大深度: ${depth - 1}`);
+      // const thinkingTime = Date.now() - this.startTime;
+      // console.log(`AI思考时间: ${thinkingTime}ms, 达到最大深度: ${depth - 1}`);
 
       return this.bestMoveFound;
     } catch (error) {
@@ -322,7 +321,6 @@ export default class ChessAI02 {
       return this.game.getValidMoves(this.game.PLAYER_A)[0];
     }
   }
-
   findBestMove() {
     try {
       return this.iterativeDeepening();

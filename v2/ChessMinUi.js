@@ -98,14 +98,11 @@ export default class ChessMinUi {
     if (cell) {
       // 添加淡红色背景
       cell.style.backgroundColor = "#FA8072";
-
       // 创建一个淡出效果
       cell.style.transition = "background-color 1s ease-out";
-
       // 设置一个定时器，在一段时间后恢复原来的颜色
       setTimeout(() => {
         cell.style.backgroundColor = "";
-
         // 移除棋子
         const piece = cell.querySelector(".piece");
         if (piece) {
@@ -116,7 +113,6 @@ export default class ChessMinUi {
       console.log("未找到要添加动画的元素");
     }
   }
-
   highlightCell(row, col) {
     const cell = this.boardElement.querySelector(
       `[data-row="${row}"][data-col="${col}"]`,
@@ -138,7 +134,6 @@ export default class ChessMinUi {
       }
     });
   }
-
   // 清除所有高亮
   clearHighlights() {
     const cells = this.boardElement.querySelectorAll(".cell");
